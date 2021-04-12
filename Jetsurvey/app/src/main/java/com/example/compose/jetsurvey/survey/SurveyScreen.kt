@@ -16,36 +16,38 @@
 
 package com.example.compose.jetsurvey.survey
 
-import androidx.compose.foundation.ScrollableColumn
-import androidx.compose.foundation.Text
-import androidx.compose.foundation.layout.ConstraintLayout
-import androidx.compose.foundation.layout.ExperimentalLayout
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.preferredHeight
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.AmbientEmphasisLevels
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
-import androidx.compose.material.ProvideEmphasis
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.savedinstancestate.savedInstanceState
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.example.compose.jetsurvey.R
 import com.example.compose.jetsurvey.theme.progressIndicatorBackground
@@ -57,9 +59,9 @@ fun SurveyQuestionsScreen(
     onDonePressed: () -> Unit,
     onBackPressed: () -> Unit
 ) {
-    var currentQuestionIndex by savedInstanceState { 0 }
-    val questionState =
-        remember(currentQuestionIndex) { questions.questionsState[currentQuestionIndex] }
+    val questionState = remember(questions.currentQuestionIndex) {
+        questions.questionsState[questions.currentQuestionIndex]
+    }
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -70,7 +72,7 @@ fun SurveyQuestionsScreen(
                     onBackPressed = onBackPressed
                 )
             },
-            bodyContent = { innerPadding ->
+            content = { innerPadding ->
                 Question(
                     question = questionState.question,
                     answer = questionState.answer,
@@ -87,8 +89,8 @@ fun SurveyQuestionsScreen(
             bottomBar = {
                 SurveyBottomBar(
                     questionState = questionState,
-                    onPreviousPressed = { currentQuestionIndex-- },
-                    onNextPressed = { currentQuestionIndex++ },
+                    onPreviousPressed = { questions.currentQuestionIndex-- },
+                    onNextPressed = { questions.currentQuestionIndex++ },
                     onDonePressed = onDonePressed
                 )
             }
@@ -103,14 +105,16 @@ fun SurveyResultScreen(
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Scaffold(
-            bodyContent = { innerPadding ->
+            content = { innerPadding ->
                 val modifier = Modifier.padding(innerPadding)
                 SurveyResult(result = result, modifier = modifier)
             },
             bottomBar = {
                 OutlinedButton(
                     onClick = { onDonePressed() },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 24.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 24.dp)
                 ) {
                     Text(text = stringResource(id = R.string.done))
                 }
@@ -121,66 +125,89 @@ fun SurveyResultScreen(
 
 @Composable
 private fun SurveyResult(result: SurveyState.Result, modifier: Modifier = Modifier) {
-    ScrollableColumn(modifier = modifier.fillMaxSize()) {
-        Spacer(modifier = Modifier.preferredHeight(44.dp))
-        Text(
-            text = result.surveyResult.library,
-            style = MaterialTheme.typography.h3,
-            modifier = Modifier.padding(horizontal = 20.dp)
-        )
-        Text(
-            text = stringResource(
-                result.surveyResult.result,
-                result.surveyResult.library
-            ),
-            style = MaterialTheme.typography.subtitle1,
-            modifier = Modifier.padding(20.dp)
-        )
-        Text(
-            text = stringResource(result.surveyResult.description),
-            style = MaterialTheme.typography.body1,
-            modifier = Modifier.padding(horizontal = 20.dp)
-        )
+    LazyColumn(modifier = modifier.fillMaxSize()) {
+        item {
+            Spacer(modifier = Modifier.height(44.dp))
+            Text(
+                text = result.surveyResult.library,
+                style = MaterialTheme.typography.h3,
+                modifier = Modifier.padding(horizontal = 20.dp)
+            )
+            Text(
+                text = stringResource(
+                    result.surveyResult.result,
+                    result.surveyResult.library
+                ),
+                style = MaterialTheme.typography.subtitle1,
+                modifier = Modifier.padding(20.dp)
+            )
+            Text(
+                text = stringResource(result.surveyResult.description),
+                style = MaterialTheme.typography.body1,
+                modifier = Modifier.padding(horizontal = 20.dp)
+            )
+        }
     }
 }
 
-@OptIn(ExperimentalLayout::class)
+@Composable
+private fun TopAppBarTitle(
+    questionIndex: Int,
+    totalQuestionsCount: Int,
+    modifier: Modifier = Modifier
+) {
+    val indexStyle = MaterialTheme.typography.caption.toSpanStyle().copy(
+        fontWeight = FontWeight.Bold
+    )
+    val totalStyle = MaterialTheme.typography.caption.toSpanStyle()
+    val text = buildAnnotatedString {
+        withStyle(style = indexStyle) {
+            append("${questionIndex + 1}")
+        }
+        withStyle(style = totalStyle) {
+            append(stringResource(R.string.question_count, totalQuestionsCount))
+        }
+    }
+    Text(
+        text = text,
+        style = MaterialTheme.typography.caption,
+        modifier = modifier
+    )
+}
+
 @Composable
 private fun SurveyTopAppBar(
     questionIndex: Int,
     totalQuestionsCount: Int,
     onBackPressed: () -> Unit
 ) {
-    ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
-        val (button, text, progress) = createRefs()
-        Text(
-            text = stringResource(
-                R.string.question_count,
-                questionIndex + 1,
-                totalQuestionsCount
-            ),
-            style = MaterialTheme.typography.caption,
-            modifier = Modifier.padding(vertical = 20.dp).constrainAs(text) {
-                centerHorizontallyTo(parent)
-            }
-        )
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            TopAppBarTitle(
+                questionIndex = questionIndex,
+                totalQuestionsCount = totalQuestionsCount,
+                modifier = Modifier
+                    .padding(vertical = 20.dp)
+                    .align(Alignment.Center)
+            )
 
-        ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.medium) {
-            IconButton(
-                onClick = onBackPressed,
-                modifier = Modifier.padding(horizontal = 12.dp).constrainAs(button) {
-                    end.linkTo(parent.end)
+            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+                IconButton(
+                    onClick = onBackPressed,
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                ) {
+                    Icon(
+                        Icons.Filled.Close,
+                        contentDescription = stringResource(id = R.string.close)
+                    )
                 }
-            ) {
-                Icon(Icons.Filled.Close)
             }
         }
-
         LinearProgressIndicator(
             progress = (questionIndex + 1) / totalQuestionsCount.toFloat(),
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).constrainAs(progress) {
-                bottom.linkTo(text.bottom)
-            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
             backgroundColor = MaterialTheme.colors.progressIndicatorBackground
         )
     }

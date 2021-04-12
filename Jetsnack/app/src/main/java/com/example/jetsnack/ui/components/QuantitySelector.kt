@@ -16,23 +16,25 @@
 
 package com.example.jetsnack.ui.components
 
-import androidx.compose.foundation.Text
-import androidx.compose.foundation.layout.ChainStyle
-import androidx.compose.foundation.layout.ConstraintLayout
-import androidx.compose.foundation.layout.preferredWidthIn
-import androidx.compose.material.AmbientEmphasisLevels
+import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material.ContentAlpha
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ProvideEmphasis
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material.icons.outlined.RemoveCircleOutline
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.ui.tooling.preview.Preview
+import androidx.constraintlayout.compose.ChainStyle
+import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.jetsnack.R
 import com.example.jetsnack.ui.theme.JetsnackTheme
 
@@ -46,7 +48,7 @@ fun QuantitySelector(
     ConstraintLayout(modifier = modifier) {
         val (qty, minus, quantity, plus) = createRefs()
         createHorizontalChain(qty, minus, quantity, plus, chainStyle = ChainStyle.Packed)
-        ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.medium) {
+        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
             Text(
                 text = stringResource(R.string.quantity),
                 style = MaterialTheme.typography.subtitle1,
@@ -58,28 +60,32 @@ fun QuantitySelector(
             )
         }
         JetsnackGradientTintedIconButton(
-            asset = Icons.Outlined.RemoveCircleOutline,
+            imageVector = Icons.Outlined.RemoveCircleOutline,
             onClick = decreaseItemCount,
+            contentDescription = stringResource(R.string.label_decrease),
             modifier = Modifier.constrainAs(minus) {
                 centerVerticallyTo(quantity)
                 linkTo(top = parent.top, bottom = parent.bottom)
             }
         )
-        ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.high) {
+        Crossfade(
+            targetState = count,
+            modifier = Modifier
+                .constrainAs(quantity) { baseline.linkTo(qty.baseline) }
+        ) {
             Text(
-                text = "$count",
+                text = "$it",
                 style = MaterialTheme.typography.subtitle2,
                 fontSize = 18.sp,
                 color = JetsnackTheme.colors.textPrimary,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.preferredWidthIn(min = 24.dp).constrainAs(quantity) {
-                    baseline.linkTo(qty.baseline)
-                }
+                modifier = Modifier.widthIn(min = 24.dp)
             )
         }
         JetsnackGradientTintedIconButton(
-            asset = Icons.Outlined.AddCircleOutline,
+            imageVector = Icons.Outlined.AddCircleOutline,
             onClick = increaseItemCount,
+            contentDescription = stringResource(R.string.label_increase),
             modifier = Modifier.constrainAs(plus) {
                 end.linkTo(parent.end)
                 centerVerticallyTo(quantity)

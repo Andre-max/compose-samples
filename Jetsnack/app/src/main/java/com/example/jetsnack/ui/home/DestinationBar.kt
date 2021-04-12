@@ -16,24 +16,26 @@
 
 package com.example.jetsnack.ui.home
 
-import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.jetsnack.R
 import com.example.jetsnack.ui.components.JetsnackDivider
 import com.example.jetsnack.ui.theme.AlphaNearOpaque
 import com.example.jetsnack.ui.theme.JetsnackTheme
-import com.example.jetsnack.ui.utils.statusBarsPadding
+import com.google.accompanist.insets.statusBarsPadding
 
 @Composable
 fun DestinationBar(modifier: Modifier = Modifier) {
@@ -59,8 +61,9 @@ fun DestinationBar(modifier: Modifier = Modifier) {
                 modifier = Modifier.align(Alignment.CenterVertically)
             ) {
                 Icon(
-                    asset = Icons.Outlined.ExpandMore,
-                    tint = JetsnackTheme.colors.brand
+                    imageVector = Icons.Outlined.ExpandMore,
+                    tint = JetsnackTheme.colors.brand,
+                    contentDescription = stringResource(R.string.label_select_delivery)
                 )
             }
         }

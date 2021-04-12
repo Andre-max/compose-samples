@@ -20,12 +20,13 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.samples.crane.R
@@ -34,9 +35,9 @@ import androidx.compose.samples.crane.calendar.model.CalendarDay
 import androidx.compose.samples.crane.calendar.model.CalendarMonth
 import androidx.compose.samples.crane.calendar.model.DaySelected
 import androidx.compose.samples.crane.data.CalendarYear
-import androidx.compose.ui.platform.setContent
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.viewinterop.viewModel
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 fun launchCalendarActivity(context: Context) {
@@ -95,7 +96,10 @@ private fun CalendarContent(
                 },
                 navigationIcon = {
                     IconButton(onClick = { onBackPressed() }) {
-                        Image(asset = vectorResource(id = R.drawable.ic_back))
+                        Image(
+                            painter = painterResource(R.drawable.ic_back),
+                            contentDescription = stringResource(R.string.cd_back)
+                        )
                     }
                 },
                 backgroundColor = MaterialTheme.colors.primaryVariant

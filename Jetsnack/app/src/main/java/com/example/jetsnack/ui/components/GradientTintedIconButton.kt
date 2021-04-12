@@ -22,13 +22,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.VectorAsset
+import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.jetsnack.ui.theme.JetsnackTheme
 
 @Composable
 fun JetsnackGradientTintedIconButton(
-    asset: VectorAsset,
+    imageVector: ImageVector,
     onClick: () -> Unit,
+    contentDescription: String?,
     modifier: Modifier = Modifier,
     colors: List<Color> = JetsnackTheme.colors.interactiveSecondary
 ) {
@@ -36,7 +37,8 @@ fun JetsnackGradientTintedIconButton(
     val blendMode = if (JetsnackTheme.colors.isDark) BlendMode.Darken else BlendMode.Plus
     IconButton(onClick = onClick, modifier) {
         Icon(
-            asset = asset,
+            imageVector = imageVector,
+            contentDescription = contentDescription,
             modifier = Modifier.diagonalGradientTint(
                 colors = colors,
                 blendMode = blendMode

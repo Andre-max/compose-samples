@@ -21,20 +21,21 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Providers
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.staticAmbientOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.ContextAmbient
+import androidx.compose.ui.platform.LocalContext
 import coil.ImageLoader
 import coil.annotation.ExperimentalCoilApi
 import coil.intercept.Interceptor
 import coil.request.ImageResult
 import coil.size.PixelSize
+import com.example.owl.R
 import com.example.owl.ui.theme.compositedOnSurface
-import dev.chrisbanes.accompanist.coil.CoilImage
+import com.google.accompanist.coil.CoilImage
+import com.google.accompanist.coil.LocalImageLoader
 import okhttp3.HttpUrl
 
 /**
@@ -43,6 +44,7 @@ import okhttp3.HttpUrl
 @Composable
 fun NetworkImage(
     url: String,
+    contentDescription: String?,
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Crop,
     placeholderColor: Color? = MaterialTheme.colors.compositedOnSurface(0.2f)
@@ -50,8 +52,9 @@ fun NetworkImage(
     CoilImage(
         data = url,
         modifier = modifier,
+        previewPlaceholder = R.drawable.photo_architecture,
+        contentDescription = contentDescription,
         contentScale = contentScale,
-        imageLoader = AmbientImageLoader.current,
         loading = {
             if (placeholderColor != null) {
                 Spacer(
@@ -64,20 +67,16 @@ fun NetworkImage(
     )
 }
 
-private val AmbientImageLoader = staticAmbientOf<ImageLoader> {
-    error("No loader provided")
-}
-
 @Composable
 fun ProvideImageLoader(content: @Composable () -> Unit) {
-    val context = ContextAmbient.current
+    val context = LocalContext.current
     val loader = remember(context) {
         ImageLoader.Builder(context)
             .componentRegistry {
                 add(UnsplashSizingInterceptor)
             }.build()
     }
-    Providers(AmbientImageLoader provides loader, children = content)
+    CompositionLocalProvider(LocalImageLoader provides loader, content = content)
 }
 
 /**

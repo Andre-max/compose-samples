@@ -17,7 +17,6 @@
 package com.example.jetnews.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
@@ -39,13 +38,9 @@ private val DarkThemeColors = darkColors(
     primaryVariant = Red700,
     onPrimary = Color.Black,
     secondary = Red300,
-    onSecondary = Color.White,
+    onSecondary = Color.Black,
     error = Red200
 )
-
-@Composable
-val Colors.snackbarAction: Color
-    get() = if (isLight) Red300 else Red700
 
 @Composable
 fun JetnewsTheme(
